@@ -1,0 +1,135 @@
+@import url("https://fonts.googleapis.com/css2?family=Raleway:wght@400;700&display=swap");
+
+html {
+  font-size: 62.5%;
+}
+
+body {
+  font-family: "Raleway", sans-serif;
+  color: #333;
+}
+
+button {
+  font-family: "Raleway", sans-serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.main {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: 20px;
+  height: 93vh;
+}
+
+.container {
+  width: 420px;
+  height: 320px;
+  background-color: aquamarine;
+  box-shadow: 0 2px 5px 0 #00000022;
+  border-radius: 5px;
+}
+
+.container .wrapper {
+  width: 100%;
+  height: 260px;
+  border: 10px inset #fedb39;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.container .screen {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.container .btn {
+  border: 0;
+  padding: 1.2rem 3.6rem;
+  border-radius: 5px;
+  transition: all 0.2s;
+  background-color: #cff5e7;
+  color: #000;
+  font-weight: bold;
+  font-size: 1.6rem;
+  box-shadow: 0 2px 4px 0 #00000011;
+  display: block;
+  margin: 8px auto;
+  cursor: pointer;
+  text-align: center;
+  width: 120px;
+}
+
+.container .btn:hover {
+  background-color: #a0e4cb;
+  color: #fff;
+}
+.container .btn:active,
+.container .btn:focus {
+  background-color: #59c1bd;
+  outline: none;
+}
+
+.bird {
+  position: absolute;
+  left: 20px;
+  bottom: 50%;
+  transition: all 0.1s;
+}
+
+.block {
+  width: 30px;
+  background-color: steelblue;
+  position: absolute;
+}
+
+.block.top::before,
+.block.bottom::before {
+  content: "";
+  position: absolute;
+  width: 120%;
+  height: 8px;
+  left: -10%;
+  background-color: rgb(57, 102, 238);
+}
+
+.block.top::before {
+  bottom: -2%;
+}
+
+.block.bottom:before {
+  top: -2%;
+}
+
+.block.top {
+  top: 0;
+}
+
+.block.bottom {
+  bottom: 0;
+}
+
+.die {
+  transform: rotateZ(-45deg);
+}
+
+.content {
+  text-align: center;
+}
+
+.content h1 {
+  font-size: 3.2rem;
+  margin-bottom: 1rem;
+  letter-spacing: 1px;
+}
+
+.content p {
+  font-size: 1.7rem;
+}
