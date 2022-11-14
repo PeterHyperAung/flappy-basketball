@@ -1,5 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=Raleway:wght@400;700&display=swap");
 
+/* resetting default configurations start */
 html {
   font-size: 62.5%;
 }
@@ -20,6 +21,9 @@ button {
   box-sizing: border-box;
 }
 
+/* resetting default configurations end */
+
+/* main screen start */
 .main {
   display: flex;
   justify-content: flex-end;
@@ -121,6 +125,9 @@ button:focus {
   transform: rotateZ(-45deg);
 }
 
+/* main screen end */
+
+/* main content start */
 .content {
   text-align: center;
 }
@@ -135,6 +142,9 @@ button:focus {
   font-size: 1.7rem;
 }
 
+/* main content end */
+
+/* alert box start */
 .alert-box {
   width: 340px;
   height: 120px;
@@ -169,3 +179,5 @@ button:focus {
 .alert-box .restart-btn:active {
   background-color: #df4141;
 }
+
+/* alert box end */

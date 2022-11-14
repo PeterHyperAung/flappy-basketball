@@ -2,59 +2,55 @@ const game = (function (bird, btn, restart, pointElId = "point") {
   class Game {
     // a set of blocks
     #blocks = [
-      [this.createBlock("20", "top"), this.createBlock("50", "bottom")],
-      [this.createBlock("30", "top"), this.createBlock("40", "bottom")],
-      [this.createBlock("40", "top"), this.createBlock("30", "bottom")],
-      [this.createBlock("50", "top"), this.createBlock("20", "bottom")],
+      [this.#createBlock("20", "top"), this.#createBlock("50", "bottom")],
+      [this.#createBlock("30", "top"), this.#createBlock("40", "bottom")],
+      [this.#createBlock("40", "top"), this.#createBlock("30", "bottom")],
+      [this.#createBlock("50", "top"), this.#createBlock("20", "bottom")],
     ].sort(() => 0.5 - Math.random());
 
     #bird;
     #firsttime = true;
     #points = 0;
-    movingInterval;
-    show;
+    #movingInterval;
+    #show;
 
     constructor(bird, btn, pointElId = "point", restart = "restart") {
       // elements
       this.btn = document.getElementById(btn);
-      this.screen = document.querySelector(".screen");
-
-      // id for showing points
       this.pointEl = document.getElementById(pointElId);
-
-      // restart button element
+      this.screen = document.querySelector(".screen");
       this.restartEl = document.getElementById(restart);
-      this.restartEl.addEventListener("click", this.restart.bind(this));
       this.restartEl.parentNode.style.visibility = "hidden";
+
+      // Events
+      this.btn.addEventListener("click", this.#btnOnClick.bind(this));
+      this.restartEl.addEventListener("click", this.#restart.bind(this));
 
       // bird object
       this.#bird = bird;
-
-      // reacting to button event
-      this.btn.addEventListener("click", this.btnOnClick.bind(this));
     }
 
     // Generating blocks
-    createBlock(height, position) {
+    #createBlock(height, position) {
       return { height, position };
     }
 
     // btn click event handler
-    btnOnClick() {
+    #btnOnClick() {
       if (!this.#firsttime) return this.#bird.jump();
-      this.start();
+      this.#start();
       this.#firsttime = false;
     }
 
     // starting or restarting the game
-    start() {
+    #start() {
       this.#bird.continuouslyDropping();
-      this.show = setInterval(this.showBlocks.bind(this), 1500);
-      this.movingInterval = setInterval(this.moving.bind(this), 20);
+      this.#show = setInterval(this.#showBlocks.bind(this), 1500);
+      this.#movingInterval = setInterval(this.#moving.bind(this), 20);
       this.btn.innerText = "Jump!";
     }
 
-    restart() {
+    #restart() {
       this.#points = 0;
       this.pointEl.innerText = this.#points;
       this.btn.innerText = "Start";
@@ -65,16 +61,16 @@ const game = (function (bird, btn, restart, pointElId = "point") {
     }
 
     // ending the game when it is over
-    end() {
-      clearInterval(this.movingInterval);
-      clearInterval(this.show);
+    #end() {
+      clearInterval(this.#movingInterval);
+      clearInterval(this.#show);
       this.#bird.die();
       this.restartEl.parentNode.style.visibility = "visible";
-      this.btn.removeEventListener("click", this.btnOnClick.bind(this));
+      this.btn.removeEventListener("click", this.#btnOnClick.bind(this));
     }
 
     // generating a div element which has classes and styles of a block
-    generateBlock(block) {
+    #generateBlock(block) {
       const el = document.createElement("div");
       el.classList.add("block");
       el.classList.add(block.position);
@@ -84,18 +80,18 @@ const game = (function (bird, btn, restart, pointElId = "point") {
     }
 
     // showing blocks to the screen
-    showBlocks() {
-      const blocks = this.selectRandomBlocks();
-      blocks.forEach((el) => this.screen.append(this.generateBlock(el)));
+    #showBlocks() {
+      const blocks = this.#selectRandomBlocks();
+      blocks.forEach((el) => this.screen.append(this.#generateBlock(el)));
     }
 
     // selecting random blocks to show them to the screen
-    selectRandomBlocks() {
+    #selectRandomBlocks() {
       return this.#blocks[Math.floor(Math.random() * this.#blocks.length)];
     }
 
     // making those blocks move
-    moving() {
+    #moving() {
       // selecting all the blocks on the screen
       const blocks = document.querySelectorAll(".block");
       blocks.forEach((el) => {
@@ -106,11 +102,11 @@ const game = (function (bird, btn, restart, pointElId = "point") {
         // adding check class to element if they are near to the bird
 
         // checking whether if the game is over or not
-        this.checkIfOver(blocks);
+        this.#checkIfOver(blocks);
 
         // Condition for adding points
         if (right === 380) {
-          this.gainPoint();
+          this.#gainPoint();
         }
 
         // removing elements for better performance after it passes through the screen
@@ -121,16 +117,18 @@ const game = (function (bird, btn, restart, pointElId = "point") {
     }
 
     // adding points and showing it to the screen
-    gainPoint() {
+    #gainPoint() {
       this.#points += 0.5;
       this.pointEl.innerText = this.#points;
     }
 
-    checkIfOver(blocks) {
-      for (let block of blocks) this.gameOverLogics(block) && this.end();
+    // checking if the game is over and not by checking each block
+    #checkIfOver(blocks) {
+      for (let block of blocks) this.#gameOverLogics(block) && this.#end();
     }
 
-    gameOverLogics(block) {
+    // game over conditions
+    #gameOverLogics(block) {
       if (this.#bird.el.classList.contains("die")) return true;
 
       const left = parseInt(block.style.right) + 30;
@@ -157,14 +155,17 @@ const game = (function (bird, btn, restart, pointElId = "point") {
 
   class Bird {
     jumpedHeight = 50;
-    riseRate = 12;
 
-    // height estimated value in percentage
-    height = 11;
-    dropRate = 2;
-    dropping;
+    // height estimated value (1sf) in percentage
+    height = 10;
+
+    #riseRate = 12;
+    #dropRate = 2;
+
+    #droppingInterval;
 
     constructor(id) {
+      // getting the element
       this.el = document.getElementById(id);
       this.el.style.bottom = this.jumpedHeight + "%";
     }
@@ -186,7 +187,7 @@ const game = (function (bird, btn, restart, pointElId = "point") {
         this.jumpedHeight += 10;
       } else if (this.jumpedHeight < 85) {
         // normal when the bird is flying lower than 85%
-        this.jumpedHeight += this.riseRate;
+        this.jumpedHeight += this.#riseRate;
       }
 
       this.el.style.bottom = this.jumpedHeight + "%";
@@ -197,14 +198,14 @@ const game = (function (bird, btn, restart, pointElId = "point") {
       this.el.classList.add("die");
       this.jumpedHeight = 0;
       this.el.style.bottom = this.jumpedHeight + "%";
-      clearInterval(this.dropping);
+      clearInterval(this.#droppingInterval);
     }
 
     // making the bird drop to the ground when it is alive
     continuouslyDropping() {
-      this.dropping = setInterval(() => {
+      this.#droppingInterval = setInterval(() => {
         if (this.jumpedHeight < 0) return this.die();
-        this.jumpedHeight -= this.dropRate;
+        this.jumpedHeight -= this.#dropRate;
         this.el.style.bottom = this.jumpedHeight + "%";
       }, 60);
     }
