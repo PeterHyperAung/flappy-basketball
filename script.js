@@ -1,4 +1,4 @@
-const game = (function (bird, btn, pointElId = "point") {
+const game = (function (bird, btn, restart, pointElId = "point") {
   class Game {
     // a set of blocks
     #blocks = [
@@ -11,14 +11,21 @@ const game = (function (bird, btn, pointElId = "point") {
     #bird;
     #firsttime = true;
     #points = 0;
+    movingInterval;
+    show;
 
-    constructor(bird, btn, block, pointElId = "point") {
+    constructor(bird, btn, pointElId = "point", restart = "restart") {
       // elements
       this.btn = document.getElementById(btn);
       this.screen = document.querySelector(".screen");
 
       // id for showing points
-      this.pointElId = pointElId;
+      this.pointEl = document.getElementById(pointElId);
+
+      // restart button element
+      this.restartEl = document.getElementById(restart);
+      this.restartEl.addEventListener("click", this.restart.bind(this));
+      this.restartEl.parentNode.style.visibility = "hidden";
 
       // bird object
       this.#bird = bird;
@@ -35,24 +42,35 @@ const game = (function (bird, btn, pointElId = "point") {
     // btn click event handler
     btnOnClick() {
       if (!this.#firsttime) return this.#bird.jump();
-      this.#firsttime = false;
       this.start();
+      this.#firsttime = false;
     }
 
-    // starting the game
+    // starting or restarting the game
     start() {
+      this.#bird.continuouslyDropping();
       this.show = setInterval(this.showBlocks.bind(this), 1500);
       this.movingInterval = setInterval(this.moving.bind(this), 20);
-      this.#bird.continuouslyDropping();
       this.btn.innerText = "Jump!";
+    }
+
+    restart() {
+      this.#points = 0;
+      this.pointEl.innerText = this.#points;
+      this.btn.innerText = "Start";
+      document.querySelectorAll(".block").forEach((el) => el.remove());
+      this.#bird.init();
+      this.#firsttime = true;
+      this.restartEl.parentNode.style.visibility = "hidden";
     }
 
     // ending the game when it is over
     end() {
-      clearInterval(this.morningInterval);
+      clearInterval(this.movingInterval);
       clearInterval(this.show);
       this.#bird.die();
-      this.btn.innerText = "Restart";
+      this.restartEl.parentNode.style.visibility = "visible";
+      this.btn.removeEventListener("click", this.btnOnClick.bind(this));
     }
 
     // generating a div element which has classes and styles of a block
@@ -105,7 +123,7 @@ const game = (function (bird, btn, pointElId = "point") {
     // adding points and showing it to the screen
     gainPoint() {
       this.#points += 0.5;
-      document.getElementById(this.pointElId).innerText = this.#points;
+      this.pointEl.innerText = this.#points;
     }
 
     checkIfOver(blocks) {
@@ -113,6 +131,8 @@ const game = (function (bird, btn, pointElId = "point") {
     }
 
     gameOverLogics(block) {
+      if (this.#bird.el.classList.contains("die")) return true;
+
       const left = parseInt(block.style.right) + 30;
       const screenHeight = parseInt(
         window.getComputedStyle(this.screen).height
@@ -122,12 +142,12 @@ const game = (function (bird, btn, pointElId = "point") {
 
       if (left > 345 && left < 382) {
         if (
-          block.classList.include("top") &&
-          this.#bird.jumpedHeight + this.bird.height > 100 - blockHeightpercent
+          block.classList.contains("top") &&
+          this.#bird.jumpedHeight + this.#bird.height > 100 - blockHeightpercent
         )
           return true;
         if (
-          block.classList.include("bottom") &&
+          block.classList.contains("bottom") &&
           this.#bird.jumpedHeight < blockHeightpercent
         )
           return true;
@@ -140,12 +160,19 @@ const game = (function (bird, btn, pointElId = "point") {
     riseRate = 12;
 
     // height estimated value in percentage
-    height = 13;
+    height = 11;
     dropRate = 2;
     dropping;
 
     constructor(id) {
       this.el = document.getElementById(id);
+      this.el.style.bottom = this.jumpedHeight + "%";
+    }
+
+    // initial state
+    init() {
+      this.el.classList.remove("die");
+      this.jumpedHeight = 50;
       this.el.style.bottom = this.jumpedHeight + "%";
     }
 
@@ -169,6 +196,7 @@ const game = (function (bird, btn, pointElId = "point") {
     die() {
       this.el.classList.add("die");
       this.jumpedHeight = 0;
+      this.el.style.bottom = this.jumpedHeight + "%";
       clearInterval(this.dropping);
     }
 
@@ -182,5 +210,5 @@ const game = (function (bird, btn, pointElId = "point") {
     }
   }
 
-  return new Game(new Bird(bird), btn, pointElId);
-})("bird", "jump");
+  return new Game(new Bird(bird), btn, pointElId, restart);
+})("bird", "jump", (restart = "restart"));
